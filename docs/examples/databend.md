@@ -10,7 +10,9 @@ Currently we are under Beta Access and You could easily take a trial on databend
 
 Currently all files stored in indexed.xyz in under [cloudflare R2](https://www.cloudflare.com/products/r2/), and we are using prefix `9d` for the demo.
 
-At First, we need to add indexed.xyz R2 as a databend [stage](https://databend.rs/doc/sql-commands/ddl/stage/).
+We would use databend [worksheet](https://docs.databend.com/using-databend-cloud/worksheet) to run all queries with the XSmall instance.
+
+At First, we need to add indexed.xyz R2 as a databend [stage](https://docs.databend.com/sql/sql-commands/ddl/stage/).
 ```sql
 CREATE STAGE r2_stage
 URL = 's3://indexed-xyz/ethereum/decoded/logs/v1.2.0/partition_key=9d/'
@@ -39,7 +41,7 @@ the data file looks like:
 | dt=2016/1680119600-25ee0299-28eb-47a4-b81e-f49f5399617b-37-45.parquet | 273489 | e41f8268c73ff9e8062a16fd1bd3d8bf | 2023-04-07 02:02:22.180 +0000 | NULL |
 | dt=2016/1680119600-25ee0299-28eb-47a4-b81e-f49f5399617b-37-9.parquet | 4220496 | f206d6bcb48483dc684ba8c67d5c6733 | 2023-04-07 02:02:22.145 +0000 | NULL |
 
-### Creeate contract table
+### Create contract table
 
 Build the target table using the following SQL
 
@@ -64,7 +66,7 @@ CREATE TABLE `contract` (
 );
 ```
 
-### Load Data from stage
+### Load data from stage
 
 ```sql
 COPY INTO contract FROM @r2_stage FILE_FORMAT = (type = PARQUET);
@@ -134,7 +136,7 @@ The result should be
 | 2023-02-01 | 1950 |
 | 2022-09-01 | 245 |
 
-### Visualize result through databend worksheet
+### Visualize result through Databend worksheet
 
 Databend Cloud natively provided a sort of visualization toolkits on worksheet.
 
