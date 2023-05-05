@@ -12,7 +12,8 @@ Currently all files stored in indexed.xyz in under [cloudflare R2](https://www.c
 
 At First, we need to add indexed.xyz R2 as a databend [stage](https://databend.rs/doc/sql-commands/ddl/stage/).
 ```sql
-CREATE STAGE r2_stage URL='s3://indexed-xyz/ethereum/decoded/logs/v1.2.0/partition_key=9d/'
+CREATE STAGE r2_stage
+URL = 's3://indexed-xyz/ethereum/decoded/logs/v1.2.0/partition_key=9d/'
 CONNECTION = (
   ENDPOINT_URL = 'https://ed5d915e0259fcddb2ab1ce5592040c3.r2.cloudflarestorage.com/'
   REGION = 'auto'
@@ -44,7 +45,9 @@ Build the target table using the following SQL
 
 ```sql
 CREATE DATABASE indexedxyz;
+
 USE indexedxyz;
+
 CREATE TABLE `contract` (
   `block_time` BIGINT NULL,
   `address` VARCHAR NULL,
@@ -75,7 +78,11 @@ Once data loaded into the `contract` table(expect around 1 to 10 minutes), we co
 We could check on the minted token for Bored Ape Yacht Club under partition `9d` by querying the data:
 
 ```sql
-select count(distinct(CAST(event_params[3] AS INTEGER))) from contract where lower(address) = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d' and event_signature = 'Transfer(address,address,uint256)';
+SELECT COUNT(DISTINCT(CAST(event_params[3] AS INTEGER)))
+FROM contract
+WHERE LOWER(address) = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d'
+  AND event_signature = 'Transfer(address,address,uint256)';
+
 ```
 
 | count() |
@@ -85,7 +92,16 @@ select count(distinct(CAST(event_params[3] AS INTEGER))) from contract where low
 And if we want to check on the transaction volume by month, use the following command
 
 ```sql
-select date_trunc('month', to_timestamp(block_time)), count(*) from contract where lower(address) = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d' and event_signature = 'Transfer(address,address,uint256)' group by 1;
+SELECT 
+    date_trunc('month', to_timestamp(block_time)), 
+    count(*) 
+FROM 
+    contract 
+WHERE 
+    lower(address) = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d' 
+    AND event_signature = 'Transfer(address,address,uint256)' 
+GROUP BY 
+    1;
 ```
 
 The result should be
